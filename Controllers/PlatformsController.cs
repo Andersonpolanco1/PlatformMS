@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using PlatformService.Data;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.DTOs;
 using PlatformService.Models;
+using Platform = PlatformService.Models.Platform;
 
 namespace PlatformService.Controllers
 {
@@ -36,23 +38,25 @@ namespace PlatformService.Controllers
 
 
         // GET: api/Platforms/5
-        [HttpGet("{platformId}")]
-        public ActionResult<IActionResult> GetPlatforms(int platformId)
+        [HttpGet("{platformId}", Name ="Get")]
+        public ActionResult<PlatformReadDto> Get(int platformId)
         {
-            return Ok(_platformRepository.GetById(platformId));
+            var platform = _platformRepository.GetById(platformId);
+
+            return Ok(_mapper.Map<PlatformReadDto>(platform));
         }
 
         // POST: api/Platforms
-        [HttpPost()]
-        public ActionResult<IActionResult> GetPlatforms(PlatformCreateDto platform)
+        [HttpPost]
+        public ActionResult<PlatformReadDto> GetPlatforms(PlatformCreateDto platform)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var newPlatform = _mapper.Map<Platform>(platform);
             _platformRepository.CreatePlatform(newPlatform);
-
-            return Ok();
+            _platformRepository.SaveChanges();
+            return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, _mapper.Map<PlatformReadDto>(newPlatform));
         }
 
 
