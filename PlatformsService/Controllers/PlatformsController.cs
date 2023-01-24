@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
-using PlatformService.Data;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.DTOs;
 using PlatformService.Models;
-using Platform = PlatformService.Models.Platform;
+using PlatformService.SyncDataServices.Http;
 
 namespace PlatformService.Controllers
 {
@@ -21,11 +16,13 @@ namespace PlatformService.Controllers
     {
         private readonly IPlatformRepository _platformRepository;
         private readonly IMapper _mapper;
+        private readonly ICommandDataclient _commandDataclient;
 
-        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper)
+        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper, ICommandDataclient client)
         {
             _platformRepository = platformRepository;
             _mapper = mapper;
+            _commandDataclient = client;
         }
 
         // GET: api/Platforms
@@ -42,13 +39,12 @@ namespace PlatformService.Controllers
         public ActionResult<PlatformReadDto> Get(int platformId)
         {
             var platform = _platformRepository.GetById(platformId);
-
             return Ok(_mapper.Map<PlatformReadDto>(platform));
         }
 
         // POST: api/Platforms
         [HttpPost]
-        public ActionResult<PlatformReadDto> GetPlatforms(PlatformCreateDto platform)
+        public async  Task<ActionResult<PlatformReadDto>> CreatePlatform(PlatformCreateDto platform)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -56,7 +52,19 @@ namespace PlatformService.Controllers
             var newPlatform = _mapper.Map<Platform>(platform);
             _platformRepository.CreatePlatform(newPlatform);
             _platformRepository.SaveChanges();
-            return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, _mapper.Map<PlatformReadDto>(newPlatform));
+
+            var platformRead =  _mapper.Map<PlatformReadDto>(newPlatform);
+
+            try
+            {
+                await _commandDataclient.SendPlatformToCommand(platformRead);
+            }
+            catch (System.Exception)
+            {
+                Console.WriteLine("Not send to command service");
+            }
+
+            return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, platformRead);
         }
 
 

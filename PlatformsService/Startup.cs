@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using PlatformService.Data;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.Data.Repositories.Impl;
+using PlatformService.SyncDataServices.Http;
 using System;
 
 namespace PlatformService
@@ -27,6 +28,7 @@ namespace PlatformService
                 opts.UseInMemoryDatabase("PlatdormsDB"));
 
             services.AddScoped<IPlatformRepository, PlatformRepository>();
+            services.AddHttpClient<ICommandDataclient, CommandDataClient>();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
