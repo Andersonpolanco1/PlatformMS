@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: command-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: commandervice
+  template:
+    metadata:
+      labels:
+        app: commandervice
+    spec:
+      containers:
+        - name: commandervice
+          image: andersonpolanco/commandservice:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: command-clusterip-srv
+spec: 
+  type: ClusterIP
+  selector: 
+    app: commandervice
+  ports:
+  - name: commandervice
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    
