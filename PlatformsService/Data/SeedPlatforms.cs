@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using PlatformService.Models;
 using System;
 using System.Linq;
@@ -8,34 +11,39 @@ namespace PlatformService.Data
 {
     public class SeedPlatforms
     { 
-        public static void PlatformDbPopulation(IApplicationBuilder app)
+        public static void PlatformDbPopulation(IApplicationBuilder app, IWebHostEnvironment env)
         {
             using(var serviceScope = app.ApplicationServices.CreateScope())
             {
-                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>());
+                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>(), env);
             }
         }
 
-        private static void SeedData(ApplicationDbContext context)
+        private static void SeedData(ApplicationDbContext context, IWebHostEnvironment env)
         {
-            if (context.Platforms.Any())
+            if (env.IsProduction())
             {
-                Console.WriteLine("We already have data");
+                try
+                {
+                    context.Database.Migrate();
+                    Console.WriteLine($"--> Successfully migrated!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Could not migrate. {ex.Message}");
+                }
             }
-            else
+
+            if (!context.Platforms.Any())
             {
-                Console.WriteLine("Seeding");
                 context.AddRange(
-                    new Platform { Name = "Microsoft", Cost = "Free", Publishser = "Microsoft" },
-                    new Platform { Name = "Kubernetes", Cost = "Free", Publishser = "Microsoft SQL" },
-                    new Platform { Name = "Docker", Cost = "Free", Publishser = "Microsoft" }
-                );
+                     new Platform { Name = "Microsoft", Cost = "Free", Publishser = "Microsoft" },
+                     new Platform { Name = "Kubernetes", Cost = "Free", Publishser = "Microsoft SQL" },
+                     new Platform { Name = "Docker", Cost = "Free", Publishser = "Microsoft" }
+                 );
                 context.SaveChanges();
-                Console.WriteLine("Seeded");
+                Console.WriteLine("--> Seeded");
             }
-
-
-
         }
     }
 }

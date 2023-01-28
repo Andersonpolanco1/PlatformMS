@@ -57,7 +57,7 @@ namespace PlatformService
                 endpoints.MapControllers();
             });
 
-            SeedPlatforms.PlatformDbPopulation(app);
+            SeedPlatforms.PlatformDbPopulation(app, env);
         }
     }
 }
