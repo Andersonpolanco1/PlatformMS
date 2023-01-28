@@ -25,7 +25,7 @@ namespace PlatformService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDbContext>(opts => 
-                opts.UseInMemoryDatabase("PlatdormsDB"));
+                opts.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString")));
 
             services.AddScoped<IPlatformRepository, PlatformRepository>();
             services.AddHttpClient<ICommandDataclient, CommandDataClient>();
