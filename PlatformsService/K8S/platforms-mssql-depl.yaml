@@ -46,7 +46,7 @@ spec:
   ports:
     - name: platforms-mssql
       protocol: TCP
-      port: 1443
+      port: 1433
       targetPort: 1433
 ---
 apiVersion: v1
