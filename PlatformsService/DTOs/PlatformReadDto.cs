@@ -4,7 +4,6 @@ namespace PlatformService.DTOs
 {
     public class PlatformReadDto
     {
-        [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
         public string Publishser { get; set; } = string.Empty;
         public string Cost { get; set; } = string.Empty;

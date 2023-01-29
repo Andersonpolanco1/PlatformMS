@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.Data.Repositories.Impl;
@@ -28,6 +29,7 @@ namespace PlatformService
                 opts.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString")));
 
             services.AddScoped<IPlatformRepository, PlatformRepository>();
+            services.AddSingleton<IMessageBusClient, MessagebusClient>();
             services.AddHttpClient<ICommandDataclient, CommandDataClient>();
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
