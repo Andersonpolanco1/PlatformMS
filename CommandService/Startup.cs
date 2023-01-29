@@ -1,4 +1,6 @@
 using CommandService.Data;
+using CommandService.Repositories.Abstract;
+using CommandService.Repositories.Impl;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,6 +33,8 @@ namespace CommandService
             services.AddDbContext<ApplicationDbContext>(opts =>
                 opts.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString")));
 
+            services.AddScoped<ICommandsRepository, CommandsRepository>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
