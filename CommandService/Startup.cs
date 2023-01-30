@@ -1,4 +1,5 @@
 using CommandService.Data;
+using CommandService.EventProcesors;
 using CommandService.Repositories.Abstract;
 using CommandService.Repositories.Impl;
 using Microsoft.AspNetCore.Builder;
@@ -34,6 +35,7 @@ namespace CommandService
                 opts.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString")));
 
             services.AddScoped<ICommandsRepository, CommandsRepository>();
+            services.AddSingleton<IEventProcessor, EventProcessor>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddControllers();
             services.AddSwaggerGen(c =>

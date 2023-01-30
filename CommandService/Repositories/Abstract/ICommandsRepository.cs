@@ -12,6 +12,7 @@ namespace CommandService.Repositories.Abstract
         IEnumerable<Platform> GetPlatforms();
         void CreatePlatform(Platform platform);
         bool PlatfotmExists(int platformId);
+        bool PlatfotmExternalIdExists(int platformExternalId);
 
         IEnumerable<Command> GetCommandsByPlatformId(int platformId);
         Command GetCommand(int PlatformId, int CommandId);

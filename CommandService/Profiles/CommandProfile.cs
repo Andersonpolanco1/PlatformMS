@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CommandService.DTOS;
 using CommandService.Models;
+using System.Net.NetworkInformation;
 
 namespace CommandService.Profiles
 {
@@ -13,6 +14,8 @@ namespace CommandService.Profiles
 
             CreateMap<Command, CommandReadDto>();
             CreateMap<Platform, PlatformReadDto>();
+            CreateMap<PlatformPublished, Platform>()
+                .ForMember(dest => dest.ExternalId, opts => opts.MapFrom(src => src.Id));
 
         }
     }
