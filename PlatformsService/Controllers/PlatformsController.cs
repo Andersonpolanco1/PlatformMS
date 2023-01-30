@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.DTOs;
 using PlatformService.Models;
@@ -17,12 +18,14 @@ namespace PlatformService.Controllers
         private readonly IPlatformRepository _platformRepository;
         private readonly IMapper _mapper;
         private readonly ICommandDataclient _commandDataclient;
+        private readonly IMessageBusClient _messageBusClient;
 
-        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper, ICommandDataclient client)
+        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper, ICommandDataclient client, IMessageBusClient messageBusClient)
         {
             _platformRepository = platformRepository;
             _mapper = mapper;
             _commandDataclient = client;
+            _messageBusClient = messageBusClient;
         }
 
         // GET: api/Platforms
@@ -59,9 +62,21 @@ namespace PlatformService.Controllers
             {
                 await _commandDataclient.SendPlatformToCommand(platformRead);
             }
-            catch (System.Exception)
+            catch (Exception)
             {
-                Console.WriteLine("Not send to command service");
+                Console.WriteLine("--> Not send to command service");
+            }
+
+            try
+            {
+                var platformPublished = _mapper.Map<PlatformPublishedDto>(platformRead);
+                platformPublished.Event = PlatformEvents.PlatformPublished;
+                _messageBusClient.PublishNewPlatform(platformPublished);
+            }
+            catch (Exception)
+            {
+
+                Console.WriteLine("--> Not send to messagebus");
             }
 
             return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, platformRead);
