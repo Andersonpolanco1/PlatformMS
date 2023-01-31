@@ -1,3 +1,4 @@
+using CommandService.AsyncDataServices;
 using CommandService.Data;
 using CommandService.EventProcesors;
 using CommandService.Repositories.Abstract;
@@ -34,6 +35,7 @@ namespace CommandService
             services.AddDbContext<ApplicationDbContext>(opts =>
                 opts.UseSqlServer(Configuration.GetConnectionString("DefaultConnectionString")));
 
+            services.AddHostedService<MessageBusSubscriber>();
             services.AddScoped<ICommandsRepository, CommandsRepository>();
             services.AddSingleton<IEventProcessor, EventProcessor>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
