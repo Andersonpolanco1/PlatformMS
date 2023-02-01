@@ -2,8 +2,8 @@
 {
     public class PlatformPublishedDto
     {
-        public string Name { get; set; } = string.Empty;
-        public string Publishser { get; set; } = string.Empty;
-        public string Event { get; set; } = string.Empty;
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Event { get; set; }
     }
 }

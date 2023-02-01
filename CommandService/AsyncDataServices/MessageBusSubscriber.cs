@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace CommandService.AsyncDataServices
         {
             _conf = conf;
             _eventProcessor = eventProcessor;
-            Init();
+            Initialize();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -44,7 +45,7 @@ namespace CommandService.AsyncDataServices
             _eventProcessor.ProcessEvent(notificationMsg);
         }
 
-        private void Init()
+        private void Initialize()
         {
             var host = _conf.GetValue<string>("Rabbitmq:Host");
             var port = _conf.GetValue<int>("Rabbitmq:Port");
