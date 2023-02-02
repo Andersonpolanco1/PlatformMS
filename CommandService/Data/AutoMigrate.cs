@@ -1,19 +1,17 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using CommandService.Models;
 using System;
-using System.Linq;
 
 namespace CommandService.Data
 {
-    public static class AutoMigrate
+    public class AutoMigrate
     {
-        public static void PlatformDbPopulation(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void CommandsDbPopulation(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            using(var serviceScope = app.ApplicationServices.CreateScope())
+            using (var serviceScope = app.ApplicationServices.CreateScope())
             {
                 SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>(), env);
             }
@@ -32,6 +30,8 @@ namespace CommandService.Data
                 {
                     Console.WriteLine($"Could not migrate. {ex.Message}");
                 }
+
+                // Seed data here
             }
         }
     }

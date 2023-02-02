@@ -65,7 +65,7 @@ namespace CommandService
                 endpoints.MapControllers();
             });
 
-            CommandService.Data.AutoMigrate.PlatformDbPopulation(app, env);
+            AutoMigrate.CommandsDbPopulation(app, env);
         }
     }
 }
