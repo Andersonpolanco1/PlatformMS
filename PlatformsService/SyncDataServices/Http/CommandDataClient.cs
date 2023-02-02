@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PlatformService.DTOs;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,16 @@ namespace PlatformService.SyncDataServices.Http
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _conf;
+        private readonly ILogger<CommandDataClient> _logger;
 
-        public CommandDataClient(HttpClient client, IConfiguration conf)
+        public CommandDataClient(HttpClient client, IConfiguration conf, ILogger<CommandDataClient> logger)
         {
             _httpClient = client;
             _conf = conf;
+            _logger = logger;
         }
 
-        public async Task SendPlatformToCommand(PlatformReadDto plat)
+        public async Task SendPlatformToCommand(PlatformPublishedDto plat)
         {
             var httpContent = new StringContent(
                 JsonSerializer.Serialize(plat),
@@ -33,11 +36,11 @@ namespace PlatformService.SyncDataServices.Http
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("Successfully!");
+                _logger.LogInformation("Successfully sent to commandService!");
             }
             else
             {
-                Console.WriteLine("Not send to command service!");
+                _logger.LogError("Not send to command service!");
             }
         }
     }

@@ -11,27 +11,32 @@ namespace PlatformService.Data
 {
     public class SeedPlatforms
     { 
-        public static void PlatformDbPopulation(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void PlatformDbPopulation(IApplicationBuilder app)
         {
             using(var serviceScope = app.ApplicationServices.CreateScope())
             {
-                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>(), env);
+                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>());
             }
         }
 
-        private static void SeedData(ApplicationDbContext context, IWebHostEnvironment env)
+        private static void SeedData(ApplicationDbContext context)
         {
-            if (env.IsProduction())
+
+            try
             {
-                try
+                if (context.Database.GetPendingMigrations().Any())
                 {
                     context.Database.Migrate();
                     Console.WriteLine($"--> Successfully migrated!");
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Could not migrate. {ex.Message}");
+                    Console.WriteLine($"--> No pending migrations!");
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not migrate: {ex.Message}");
             }
 
             if (!context.Platforms.Any())
@@ -42,7 +47,7 @@ namespace PlatformService.Data
                      new Platform { Name = "Docker", Cost = "Free", Publishser = "Microsoft" }
                  );
                 context.SaveChanges();
-                Console.WriteLine("--> Seeded");
+                Console.WriteLine("--> Platforms Database Seeded");
             }
         }
     }

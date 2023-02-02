@@ -30,10 +30,20 @@ namespace CommandService.AsyncDataServices
         {
             stoppingToken.ThrowIfCancellationRequested();
 
-            var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += OnReceibed;
-            _channel.BasicConsume(_queueName, true, consumer);
-            return Task.CompletedTask;
+            try
+            {
+                var consumer = new EventingBasicConsumer(_channel);
+                consumer.Received += OnReceibed;
+                _channel.BasicConsume(_queueName, true, consumer);
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult<string>(ex.Message);
+
+            }
+
+
         }
 
         private void OnReceibed(object sender, BasicDeliverEventArgs e)
@@ -53,14 +63,24 @@ namespace CommandService.AsyncDataServices
 
             var factory = new ConnectionFactory() { HostName = host, Port = port };
 
-            _connection = factory.CreateConnection();
-            _connection.ConnectionShutdown += OnConnectionShutdown;
-            _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchangeName, ExchangeType.Fanout);
-            _queueName = _channel.QueueDeclare().QueueName;
-            _channel.QueueBind(_queueName, exchangeName, string.Empty);
+            try
+            {
+                _connection = factory.CreateConnection();
+                _connection.ConnectionShutdown += OnConnectionShutdown;
+                _channel = _connection.CreateModel();
+                _channel.ExchangeDeclare(exchangeName, ExchangeType.Fanout);
+                _queueName = _channel.QueueDeclare().QueueName;
+                _channel.QueueBind(_queueName, exchangeName, string.Empty);
 
-            Console.WriteLine("--> Listening on the Message Bus...");
+                Console.WriteLine("--> Listening on the Message Bus...");
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine($"--> Could not connect Message Bus: {ex.Message}");
+            }
+
+
 
         }
 

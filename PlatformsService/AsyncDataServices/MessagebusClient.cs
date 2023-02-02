@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PlatformService.DTOs;
 using RabbitMQ.Client;
 using System;
@@ -10,50 +11,51 @@ namespace PlatformService.AsyncDataServices
     public class MessagebusClient : IMessageBusClient, IDisposable
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<MessagebusClient> _logger;
         private readonly IConnection _connection;
         private readonly IModel _channel;
 
-        public MessagebusClient(IConfiguration conf)
+        public MessagebusClient(IConfiguration conf, ILogger<MessagebusClient> logger)
         {
             _config = conf;
-
-            var factory = new ConnectionFactory() 
-            { 
-                HostName = _config.GetValue<string>("Rabbitmq:Host"), 
-                Port = _config.GetValue<int>("Rabbitmq:Port")
-            };
+            _logger = logger;
 
             try
             {
+                var factory = new ConnectionFactory() 
+                { 
+                    HostName = _config.GetValue<string>("Rabbitmq:Host"), 
+                    Port = _config.GetValue<int>("Rabbitmq:Port")
+                };
                 _connection = factory.CreateConnection();
                 _connection.ConnectionShutdown += OnConnectionShutDown;
                 _channel = _connection.CreateModel();
                 _channel.ExchangeDeclare(_config.GetValue<string>("Rabbitmq:ExchangeName"), ExchangeType.Fanout);
 
-                Console.WriteLine("--> Connected to message bus.");
+                _logger.LogInformation("--> Connected to message bus.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("--> Could not connect to message bus.");
+                _logger.LogError($"--> Could not connect to message bus: {ex.Message}");
             }
         }
 
         private void OnConnectionShutDown(object sender, ShutdownEventArgs e)
         {
-            Console.WriteLine("--> Connection shutdown");
+            _logger.LogInformation("--> Connection shutdown");
         }
 
         public void PublishNewPlatform(PlatformPublishedDto platform)
         {
-            if (_connection.IsOpen)
+            if (_connection != null && _connection.IsOpen)
             {
-                Console.WriteLine("--> Connection state: open -> Sending message...");
+                _logger.LogInformation("--> Connection state: open -> Sending message to Message Bus...");
                 var message = JsonSerializer.Serialize(platform);
                 SendMessage(message);
             }
             else
             {
-                Console.WriteLine("--> Connection state: closed -> Could not send message.");
+                _logger.LogError("--> Connection state: closed -> Could not send message to Message Bus.");
             }
 
         }
@@ -62,7 +64,7 @@ namespace PlatformService.AsyncDataServices
         {
             var body = Encoding.UTF8.GetBytes(message ?? string.Empty);
             _channel.BasicPublish(_config.GetValue<string>("Rabbitmq:ExchangeName"), "", null, body);
-            Console.WriteLine($"--> We have send: {message}");
+            _logger.LogInformation($"--> We have send: {message}");
         }
 
         public void Dispose()

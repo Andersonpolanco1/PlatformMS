@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using PlatformService.AsyncDataServices;
 using PlatformService.Data;
@@ -31,6 +33,8 @@ namespace PlatformService
             services.AddScoped<IPlatformRepository, PlatformRepository>();
             services.AddSingleton<IMessageBusClient, MessagebusClient>();
             services.AddHttpClient<ICommandDataclient, CommandDataClient>();
+            services.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
+            services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddControllers();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSwaggerGen(c =>
@@ -59,7 +63,7 @@ namespace PlatformService
                 endpoints.MapControllers();
             });
 
-            SeedPlatforms.PlatformDbPopulation(app, env);
+            SeedPlatforms.PlatformDbPopulation(app);
         }
     }
 }

@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using PlatformService.AsyncDataServices;
 using PlatformService.Data.Repositories.Abstract;
 using PlatformService.DTOs;
@@ -19,13 +22,15 @@ namespace PlatformService.Controllers
         private readonly IMapper _mapper;
         private readonly ICommandDataclient _commandDataclient;
         private readonly IMessageBusClient _messageBusClient;
+        private readonly ILogger<PlatformsController> _logger;
 
-        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper, ICommandDataclient client, IMessageBusClient messageBusClient)
+        public PlatformsController(IPlatformRepository platformRepository, IMapper mapper, ICommandDataclient client, IMessageBusClient messageBusClient, ILogger<PlatformsController> logger)
         {
             _platformRepository = platformRepository;
             _mapper = mapper;
             _commandDataclient = client;
             _messageBusClient = messageBusClient;
+            _logger = logger;
         }
 
         // GET: api/Platforms
@@ -55,30 +60,29 @@ namespace PlatformService.Controllers
             var newPlatform = _mapper.Map<Platform>(platform);
             _platformRepository.CreatePlatform(newPlatform);
             _platformRepository.SaveChanges();
+            _logger.LogInformation($"--> Message was send to command service via HTTP");
 
-            var platformRead =  _mapper.Map<PlatformReadDto>(newPlatform);
 
+            var platformPublished = _mapper.Map<PlatformPublishedDto>(newPlatform);
+            platformPublished.Event = PlatformEvents.PlatformPublished;
+
+            //This is a example to send via HTTP to another service
             try
             {
-                await _commandDataclient.SendPlatformToCommand(platformRead);
+                await _commandDataclient.SendPlatformToCommand(platformPublished);
+                _logger.LogInformation($"--> Message was send to command service via HTTP");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("--> Not send to command service");
+                _logger.LogError($"--> Message not send to command service via HTTP: {ex.Message}");
             }
+            // end example
 
-            try
-            {
-                var platformPublished = _mapper.Map<PlatformPublishedDto>(platformRead);
-                platformPublished.Event = PlatformEvents.PlatformPublished;
-                _messageBusClient.PublishNewPlatform(platformPublished);
-            }
-            catch (Exception)
-            {
 
-                Console.WriteLine("--> Not send to messagebus");
-            }
+            // Sending to Message Bus 
+            _messageBusClient.PublishNewPlatform(platformPublished);
 
+            var platformRead = _mapper.Map<PlatformReadDto>(newPlatform);
             return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, platformRead);
         }
 

@@ -32,11 +32,10 @@ namespace CommandService.Controllers
 
 
         [HttpPost]
-        public ActionResult TestInboundConnection()
+        public ActionResult TestInboundConnection(PlatformPublished platformPublished)
         {
-            Console.WriteLine("---> Testing");
-
-            return Ok("Test");
+            Console.WriteLine($"---> Receibed in CommandService via HTTP: {platformPublished.Id} - {platformPublished.Name}");
+            return Ok(platformPublished);
         }
     }
 }

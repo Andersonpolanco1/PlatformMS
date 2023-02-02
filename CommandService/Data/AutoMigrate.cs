@@ -4,35 +4,41 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Linq;
 
 namespace CommandService.Data
 {
     public class AutoMigrate
     {
-        public static void CommandsDbPopulation(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void CommandsDbPopulation(IApplicationBuilder app)
         {
             using (var serviceScope = app.ApplicationServices.CreateScope())
             {
-                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>(), env);
+                SeedData(serviceScope.ServiceProvider.GetService<ApplicationDbContext>());
             }
         }
 
-        private static void SeedData(ApplicationDbContext context, IWebHostEnvironment env)
+        private static void SeedData(ApplicationDbContext context)
         {
-            if (env.IsProduction())
+            try
             {
-                try
+                if(context.Database.GetPendingMigrations().Any())
                 {
                     context.Database.Migrate();
                     Console.WriteLine($"--> Successfully migrated!");
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Could not migrate. {ex.Message}");
+                    Console.WriteLine($"--> No pending migrations!");
                 }
-
-                // Seed data here
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> Could not migrate: {ex.Message}");
+            }
+
+            // Seed data here
+            
         }
     }
 }
