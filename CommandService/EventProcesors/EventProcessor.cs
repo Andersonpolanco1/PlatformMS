@@ -25,6 +25,7 @@ namespace CommandService.EventProcesors
             switch (evnt)
             {
                 case EventType.PlatformPublished:
+                    AddPlatform(message);
                     break;
                 case EventType.Undefined:
                     break;
@@ -68,6 +69,7 @@ namespace CommandService.EventProcesors
                     {
                         repository.CreatePlatform(platform);
                         repository.SaveChanges();
+                        Console.WriteLine("--> platform saved in commandService!.");
                     }
                 }
                 catch (Exception)
