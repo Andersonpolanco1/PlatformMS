@@ -36,7 +36,6 @@ namespace CommandService.Repositories.Impl
                 throw new ArgumentNullException("Platform to save is null");
 
             _context.Platforms.Add(platform);
-            _context.SaveChanges();
         }
 
         public Command GetCommand(int platformId, int commandId)
