@@ -20,6 +20,7 @@ namespace CommandService.Controllers
             _mapper = mapper;
         }
 
+        //GET: api/c/Platforms/{platformId}/Commands
         [HttpGet]
         public IActionResult GetCommandsByPlatformId(int platformId)
         {
@@ -30,6 +31,7 @@ namespace CommandService.Controllers
             return Ok(_mapper.Map<IEnumerable<CommandReadDto>>(commands));
         }
 
+        //GET: api/c/Platforms/{platformId}/Commands/{commandId}
         [HttpGet("{commandId}", Name = "GetCommand")]
         public IActionResult GetCommand(int platformId, int commandId)
         {
@@ -44,6 +46,7 @@ namespace CommandService.Controllers
             return Ok(_mapper.Map<CommandReadDto>(command));
         }
 
+        //POST: api/c/Platforms/{platformId}/Commands
         [HttpPost]
         public IActionResult CreateCommand(int platformId, CommandCreateDto command)
         {

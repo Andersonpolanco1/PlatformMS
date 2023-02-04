@@ -60,27 +60,23 @@ namespace PlatformService.Controllers
             var newPlatform = _mapper.Map<Platform>(platform);
             _platformRepository.CreatePlatform(newPlatform);
             _platformRepository.SaveChanges();
-            _logger.LogInformation($"--> Message was send to command service via HTTP");
-
 
             var platformPublished = _mapper.Map<PlatformPublishedDto>(newPlatform);
             platformPublished.Event = PlatformEvents.PlatformPublished;
 
-            //This is a example to send via HTTP to another service
+            //This is a example to send data via HTTP to another service
             try
             {
                 await _commandDataclient.SendPlatformToCommand(platformPublished);
-                _logger.LogInformation($"--> Message was send to command service via HTTP");
+                _logger.LogInformation($"--> Message was sent to command service via HTTP");
             }
             catch (Exception ex)
             {
-                _logger.LogError($"--> Message not send to command service via HTTP: {ex.Message}");
+                _logger.LogError($"--> Can not send Message to command service via HTTP: {ex.Message}");
             }
             // end example
-
-
-            // Sending to Message Bus 
-            _messageBusClient.PublishNewPlatform(platformPublished);
+       
+            _messageBusClient.PublishNewPlatform(platformPublished);  // Sending to Message Bus 
 
             var platformRead = _mapper.Map<PlatformReadDto>(newPlatform);
             return CreatedAtRoute(nameof(Get), new { platformId = newPlatform.Id }, platformRead);
