@@ -6,6 +6,7 @@ namespace CommandService.Models
 {
     public class Platform
     {
+        [Key]
         public int Id { get; set; }
 
         public int ExternalId { get; set; }
