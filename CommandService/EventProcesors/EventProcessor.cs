@@ -59,14 +59,15 @@ namespace CommandService.EventProcesors
 
                 try
                 {
-                    var platform = _mapper.Map<Platform>(platformPublishedDto);
+                    var platformCreate = _mapper.Map<PlatformCreateDto>(platformPublishedDto);
 
-                    if (repository.PlatfotmExternalIdExists(platform.ExternalId))
+                    if (repository.PlatfotmExternalIdExists(platformCreate.ExternalId))
                     {
                         Console.WriteLine("--> Could not save platform in command service, Platform exists.");
                     }
                     else
                     {
+                        var platform = _mapper.Map<Platform>(platformCreate);
                         repository.CreatePlatform(platform);
                         repository.SaveChanges();
                         Console.WriteLine("--> platform saved in commandService!.");
