@@ -13,13 +13,12 @@ You must have the following installed:
 - [Visual Studio](https://visualstudio.microsoft.com/es/vs/) or [Visual Studio Code](https://code.visualstudio.com/)
 - Some tool to test the API's like [Postman](https://www.postman.com/downloads/).
 - [SQL Server Data Tools](https://www.microsoft.com/es-es/sql-server/developer-tools)
-- [Docker hub account](https://hub.docker.com/signup)
 
 ### Running the project:
 
-After enabling Kubernetes on Docker Desktop and login in docker hub...
+After enabling Kubernetes on Docker Desktop...
 
-open a terminal and execute:
+Open a terminal and execute:
 
 To deploy API Gateway - Ingress Nginx:
 
@@ -29,7 +28,7 @@ Generate the secret password in kubernetes for the Platforms Service database:
 
 `kubectl create secret generic mssql --from-literal=SA_PASSWORD="pa55w0rd!"`
 
-[You must modify the `Host` file](https://support.managed.com/kb/a683/how-to-modify-your-hosts-file-so-you-can-work-on-a-site-that-is-not-yet-live.aspx) to add a domain. in Windows the file path is `C:\Windows\System32\drivers\etc\hosts` for other operating systems, investigate the path, open the file and add the domain of your choice, in this project andersonpolanco.com was used as an example. do, you can use it or change it to your preference. Save the file and put the same domain in the `ingress-srv.yaml` file
+[You must modify the `Host` file](https://support.managed.com/kb/a683/how-to-modify-your-hosts-file-so-you-can-work-on-a-site-that-is-not-yet-live.aspx) to add a domain. in Windows the file path is `C:\Windows\System32\drivers\etc\hosts` for other operating systems, investigate the path, open the file and add the domain of your choice, in this project andersonpolanco.com.do was used as an example. do, you can use it or change it to your preference. Save the file and put the same domain in the `ingress-srv.yaml` file
 
 Then go to the folder in the `PlatformsMS/K8S` path and run the following commands:
 
@@ -41,14 +40,6 @@ Then go to the folder in the `PlatformsMS/K8S` path and run the following comman
 
 `kubectl apply -f rabbitmq-depl.yaml`
 
-Go to the path `PlatformMS/PlatformsService` and run the following commands to build and push service image:
-
-`docker build -t {YourUserName/platformsservice} .` (lowercase all)
-
-Then push the image to docker hub:
-
-`docker push {YourUserName/platformsservice}`
-
 Go to the path `PlatformMS/PlatformsService/K8S` and run the following commands:
 
 In the file platforms-depl.yaml correct the name of the image you just created
@@ -58,16 +49,6 @@ And then execute:
 `kubectl apply -f platforms-mssql-depl.yaml`
 
 `kubectl apply -f platforms-depl.yaml`
-
-Go to the path `PlatformMS/CommandsService` and run the following commands to build and push service image:
-
-`docker build -t {YourUserName/commandsservice} .` (lowercase all)
-
-Then push the image to docker hub:
-
-`docker push {YourUserName/commandsservice}`
-
-In the file commands-depl.yaml correct the name of the image you just created
 
 Go to the path /PlatformMS/CommandService/K8S and run the following commands:
 
